@@ -36,17 +36,17 @@ export default defineConfig(({ command, mode }) => {
       {
         name:'vue',
         var:'Vue',
-        path:'https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.47/vue.cjs.prod.min.js',
+        path:'https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.47/vue.cjs.js',
       },
       {
         name:'vue-router',
         var:'VueRouter',
-        path:'https://cdnjs.cloudflare.com/ajax/libs/vue-router/4.1.6/vue-router.cjs.prod.min.js',
+        path:'https://cdnjs.cloudflare.com/ajax/libs/vue-router/4.1.6/vue-router.cjs.js',
       },
       {
         name:'pinia',
         var:'Pinia',
-        path:'https://cdnjs.cloudflare.com/ajax/libs/pinia/2.0.35/pinia.iife.prod.min.js',
+        path:'https://cdnjs.cloudflare.com/ajax/libs/pinia/2.0.36/pinia.iife.js',
       }
     ]
   })]
