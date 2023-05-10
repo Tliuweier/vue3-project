@@ -35,12 +35,12 @@ export default defineConfig(({ command, mode }) => {
     modules:[
       {
         name:'vue',
-        var:'vue',
+        var:'Vue',
         path:'https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.47/vue.global.min.js',
       },
       {
         name:'vue-router',
-        var:'vueRouter',
+        var:'VueRouter',
         path:'https://cdnjs.cloudflare.com/ajax/libs/vue-router/4.1.6/vue-router.global.js',
       }
     ]
