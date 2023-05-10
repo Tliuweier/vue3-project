@@ -59,7 +59,7 @@ export default defineConfig(({ command, mode }) => {
     ]
   }
   return{
-    base:'/vue3-project',
+    base:'/vue3-project/',
     plugins,
     devServer,
     resolve
