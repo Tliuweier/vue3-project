@@ -1,0 +1,1 @@
+import{_ as e}from"./index-e7ade9f7.js";import"vue";const r={};function c(n,o){return Vue.openBlock(),Vue.createElementBlock("div",null,"手写promise函数")}const s=e(r,[["render",c]]);export{s as default};
