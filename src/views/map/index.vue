@@ -17,7 +17,7 @@ let  ajaxRequest = (url:string,data?:any)=>{
 
 onMounted(async () => {
     
-    var myChart = echarts.init(document.getElementById('bar'));
+    var myChart = echarts.init(document.getElementById('bar') as HTMLElement);
     myChart.setOption({
         title: {
             text: 'ECharts 入门示例'
@@ -37,14 +37,14 @@ onMounted(async () => {
     });
    let {data} = await ajaxRequest('https://geojson.cn/api/data/china.json')
     console.log(data)
-    var mapChart = echarts.init(document.getElementById('map'));
+    var mapChart = echarts.init(document.getElementById('map') as HTMLElement);
     echarts.registerMap('chinaGeo',data)
     mapChart.setOption({
         title:{
             text:'map视图'
         },
         tooltip: {
-            formatter(params){
+            formatter(params:any){
                
                 return `${params.name} 目前  ${params.value||0}`
             }
