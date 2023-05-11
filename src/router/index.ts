@@ -9,18 +9,18 @@ const comModules = import.meta.glob('../views/**/index.vue')
 let  routes:any = Object.entries(pageModules).map(([pagePath,config])=>{
     // console.log(pagePath,config)
     let path = pagePath.replace('../views','').replace('/page.ts','')
-    path = path || '/index'
+    path = path || '/'
     let name = path.split('/').filter(Boolean).join('-') || 'index'
     let comPath = pagePath.replace('page.ts','index.vue')
-    console.log(`/vue3-project${path}`)
+    // console.log(`/vue3-project${path}`)
     return {
-		path:`/vue3-project${path}`,
+		path,
 		name,
 		component:comModules[comPath],
 		meta:config
 	}
 })
-console.log(routes)
+// console.log(routes)
 
 // let routes1 = [
 //     {
