@@ -12,7 +12,7 @@ let  routes:any = Object.entries(pageModules).map(([pagePath,config])=>{
     path = path || '/'
     let name = path.split('/').filter(Boolean).join('-') || 'index'
     let comPath = pagePath.replace('page.ts','index.vue')
-    // console.log(`/vue3-project${path}`)
+    // console.log(`${path}`)
     return {
 		path,
 		name,
