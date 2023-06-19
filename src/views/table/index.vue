@@ -11,64 +11,27 @@
                         </n-upload>
 
                     </n-space>
-                    <n-data-table :data="importData" :columns="importColumns" :bordered="true" />
-
+                    <!-- <n-data-table :data="importData" :columns="importColumns" :bordered="true" /> -->
+                    <n-tabs v-if="importTabObject.tabs.length>0" type="card" @update:value="handleUpdateTabValue"  animated :default-value="importTabObject.tabs[0]">
+                        <n-tab-pane v-for="item in importTabObject.tabs" :key="item" :name="item">
+                            <n-data-table :data="tabData" :columns="tabcolums" :bordered="true" /> 
+                        </n-tab-pane>
+                    </n-tabs>
                 </n-tab-pane>
-                <n-tab-pane name="table" tab="纯表格">
-                    <n-space class="margin-top" justify="end">
-                        <n-button type="primary">导入数据</n-button>
-                    </n-space>
-                    <n-table :bordered="false" :single-line="false">
-                        <thead>
-                            <tr>
-                                <th>Abandon</th>
-                                <th>Abnormal</th>
-                                <th>Abolish</th>
-                                <th>...</th>
-                                <th>万事开头难</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>放弃</td>
-                                <td>反常的</td>
-                                <td>彻底废除</td>
-                                <td>...</td>
-                                <td>干！我刚才背的是啥</td>
-                            </tr>
-                            <tr>
-                                <td>放弃</td>
-                                <td>反常的</td>
-                                <td>彻底废除</td>
-                                <td>...</td>
-                                <td>干！我刚才背的是啥</td>
-                            </tr>
-                            <tr>
-                                <td>放弃</td>
-                                <td>反常的</td>
-                                <td>彻底废除</td>
-                                <td>...</td>
-                                <td>干！我刚才背的是啥</td>
-                            </tr>
-                            <tr>
-                                <td>放弃</td>
-                                <td>反常的</td>
-                                <td>彻底废除</td>
-                                <td>...</td>
-                                <td>干！我刚才背的是啥</td>
-                            </tr>
-                        </tbody>
-                    </n-table>
+                <n-tab-pane name="table" tab="html5元素周期表">
+                    <PeriodicTable>
+                        <template #head>
+                            HTML 元素周期表
+                        </template>
+                    </PeriodicTable>
                 </n-tab-pane>
                 <n-tab-pane name="exportData" tab="导出数据">
                     <n-space class="margin-top" justify="end">
                         <n-button type="primary" @click="handleAddData">新增数据</n-button>
                         <n-button type="primary" @click="handleExportData">导出数据</n-button>
                     </n-space>
-                    <n-data-table :pagination="pagination" 
-                    :row-key="rowKey" :data="exportData" 
-                    @update:checked-row-keys="handleCheck"
-                    :columns="exportColumns" :bordered="true" />
+                    <n-data-table :pagination="pagination" :row-key="rowKey" :data="exportData"
+                        @update:checked-row-keys="handleCheck" :columns="exportColumns" :bordered="true" />
                 </n-tab-pane>
             </n-tabs>
         </n-gi>
@@ -109,98 +72,59 @@
 </template>
 <script setup lang="ts">
 // UI引入
-import { ref, reactive, h,toRaw,defineComponent,nextTick } from 'vue'
+import { ref, reactive, h, toRaw } from 'vue'
 import {
-    NSpace, NGi, NGrid, NTabs, NTabPane, NTable, NDataTable,
+    NSpace, NGi, NGrid, NTabs, NTabPane, NDataTable,
     NButton, NUpload, NModal, NForm, NFormItem,
-    NInput, NSelect, FormInst, FormItemRule,useMessage
+    NInput, NSelect, FormInst, FormItemRule, useMessage
 } from 'naive-ui'
-// xlsx 
-import * as  XLSX from 'xlsx'
 import _ from 'lodash'
-
-
-
-let InputCom = defineComponent({
-    props: {
-        value: [String, Number],
-        onUpdateValue:[Function,Array]
-    },
-    setup(props) {
-        const isEdit = ref(false)
-        const inputRef = ref(null)
-        const inputValue = ref(props.value)
-        function handleOnClick() {
-            isEdit.value = true
-            nextTick(() => {
-                inputRef.value.focus()
-            })
-        }
-        function handleChange() {
-            props.onUpdateValue(inputValue.value)
-            isEdit.value = false
-        }
-        return () => {
-            h('div', { style: 'min-height: 22px', onClick: handleOnClick },
-                isEdit.value ? h(NInput, {
-                    ref:inputRef,
-                    value: inputValue.value,
-                    onUpdateValue: (v) => {
-                        inputValue.value = v
-                    },
-                    onChange: handleChange,
-                    onBlur: handleChange
-                }) : props.value
-            )
-        }
-    }
-})
+// 组件
+import PeriodicTable from '../../components/PeriodicTable.vue'
+import utils from '../../utils'  //导入写法
+// const { proxy }  = getCurrentInstance() as ComponentInternalInstance;
+// const { $utils } = proxy
 
 // 导入数据table
 let importData = ref()
-let importColumns = reactive([{
+let importColumns = ref([{
     align: '',
     key: '',
     title: ''
 }])
-let handleChangeFile = (options: any) => {
-    let files = options.file.file
-    readerData(files)
+let tabcolums = ref<Array<object> >([]) 
+let tabData = ref<Array<object>>([])
+let handleUpdateTabValue = (tabName:string)=>{
+    // console.log(tabName)
+    tabcolums.value = importTabObject.value.tabcolums.get(`${tabName}`)!
+    tabData.value = importTabObject.value.tabDatas.get(`${tabName}`)!
 }
-let readerData = (files: any) => {
-    let reader = new FileReader()
-    reader.onload = (e: any) => {
-        let data = XLSX.read(e.target.result, { type: 'binary' })
-        console.log(data)
-        const firstSheetName = data.SheetNames[0]
-        const worksheet = data.Sheets[firstSheetName]
-        // const header = getHeaderRow(worksheet)
-        const results = XLSX.utils.sheet_to_json(worksheet)
-        // console.log(results)
-        editTableData(results)
-    }
-    reader.readAsBinaryString(files)
-}
-let editTableData = (results: any) => {
-    let list = []
-    for (let key in results[0]) {
-        console.log(key)
-        let columnItem = {
-            title: '',
-            key: '',
-            align: ''
-        }
-        columnItem.title = key
-        columnItem.key = key
-        columnItem.align = 'center'
-        list.push(columnItem)
-    }
-    importColumns = list
-    importData.value = results
+interface importTabObject{
+    tabs:Array<string>,
+    tabcolums:Map<string,Array<object>>,
+    tabDatas:Map<string,Array<object>>
 }
 
+let importTabObject= ref<importTabObject>(
+    {
+        tabs:[],
+        tabcolums:new Map(),
+        tabDatas:new Map()
+    }
+)
+let handleChangeFile = (options: any) => {
+    let files = options.file.file
+    // readerData(files)
+    // utils.importExeclData(files,importColumns,importData)
+    utils.importExeclDatas(files,importTabObject)
+    // console.log(importTabObject.value.tabs[0])
+    setTimeout(function(){
+        handleUpdateTabValue(importTabObject.value.tabs[0])
+    },100)
+    
+}
 // 导出数据table
-let awaitExportData = reactive<Array<object>>([])
+let awaitExportData = reactive<Array<formData>>([])
 let exportColumns = reactive([
     {
         type: 'selection',
@@ -267,7 +191,7 @@ let exportColumns = reactive([
         }
     }
 ])
-let exportData = ref(
+let exportData = ref<Array<formData>>(
     [
         {
             "id": "858203",
@@ -414,77 +338,33 @@ let exportData = ref(
         }
     ]
 )
-let handleCheck = (rowKeys:any)=>{
-    let list = _.map(rowKeys,it=>{
-        return _.filter(exportData.value,item=>{
+let handleCheck = (rowKeys: any) => {
+    let list = _.map(rowKeys, it => {
+        return _.filter(exportData.value, item => {
             return item.id == it;
         })
     })
-    // console.log(list)
-    let newList = [..._.map(list,it=>{
-       return toRaw(it[0])
+    let newList = [..._.map(list, it => {
+        return toRaw(it[0])
     })]
     awaitExportData = newList
 }
 let handleExportData = () => {
-    if(awaitExportData.length==0){
+    if (awaitExportData.length == 0) {
         message.warning('请选择导出数据')
         return;
     }
     let list = awaitExportData
-    let sheet1 = XLSX.utils.json_to_sheet(list)
-    // console.log(sheet1)
-    let wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, sheet1, '产品统计')
-    // 生成文件
-    const workbookBlob = workbook2blob(wb)
-    // 下载文件
-    openDownloadDialog(workbookBlob, '产品信息.xlsx')
-
+    utils.exportExeclData(list,'产品统计','产品信息.xlsx')
 }
-let workbook2blob = (workbook: any) => {
-    // 生成文件
-    let wopts: {
-        bookType: string,
-        bookSST: boolean,
-        type: string
-    } = {
-        // 要生成的文件类型
-        bookType: 'xlsx',
-        // // 是否生成Shared String Table，官方解释是，如果开启生成速度会下降，但在低版本IOS设备上有更好的兼容性
-        bookSST: false,
-        type: 'binary'
-    }
-    let wbout = XLSX.write(workbook, wopts)
-    function s2ab(s: any) {
-        var buf = new ArrayBuffer(s.length)
-        var view = new Uint8Array(buf)
-        for (var i = 0; i !== s.length; ++i) view[i] = s.charCodeAt(i) & 0xff
-        return buf;
-    }
-    let buf = s2ab(wbout)
-    var blob = new Blob([buf], {
-        type: 'application/octet-stream'
-    })
-    return blob
-}
-let openDownloadDialog = (blob: any, fileName: string) => {
-
-    var aLink = document.createElement('a')
-    let url = window.URL.createObjectURL(new Blob([blob], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }))
-    aLink.href = url;
-    aLink.download = `${fileName}`;
-    aLink.click();
-    window.URL.revokeObjectURL(url);
-}
-let rowKey = (row:any)=>row.id
+let rowKey = (row: any) => row.id
 // 公共
 let pagination = ref({
     pageSize: 10
 })
 let title = ref<string>('')
 let disabled = ref(false)
-let type = ref<string|null>(null)
+let type = ref<string | null>(null)
 const message = useMessage()
 // 列表操作按钮
 let handleAddData = () => {
@@ -510,7 +390,17 @@ let handleDeleteData = (rowData: object) => {
 
 // modal
 let showModal = ref(false)
-let formData = ref({})
+interface formData {
+    id?: string,
+    sortNo?:number,
+    product?: string
+    stock?: number
+    price?: number
+    salePrice?: number
+    status?: string,
+    tags?:number[]
+}
+let formData = ref<formData>({})
 let rules = {
     id: {
         required: true,
@@ -519,7 +409,7 @@ let rules = {
     },
     sortNo: {
         required: true,
-        type:'number',
+        type: 'number',
         trigger: ['blur', 'input'],
         message: '请输入排序编号'
     },
@@ -564,15 +454,16 @@ let handleSubmitData = (e: MouseEvent) => {
     e.preventDefault()
     formRef.value?.validate((errors) => {
         if (!errors) {
-            if(type.value =='add'){
-                exportData.value.unshift(formData.value)
-            }else if(type.value == 'edit'){
-                let index = _.findIndex(exportData.value,function(item){
+            if (type.value == 'add') {
+                let value =formData.value!
+                exportData.value.unshift(value)
+            } else if (type.value == 'edit') {
+                let index = _.findIndex(exportData.value, function (item) {
                     return item.id == formData.value.id
                 })
                 exportData.value[index] = formData.value
             }
-            message.success(type.value=='add'? '操作成功' : '编辑成功')
+            message.success(type.value == 'add' ? '操作成功' : '编辑成功')
             showModal.value = false
         } else {
             console.log(errors)
@@ -597,13 +488,44 @@ let options = [
         value: 'OUT_STOCK'
     },
 ]
-
-
 // 可编辑的table
-const getDataIndex = (id:string) => {
-      return exportData.value.findIndex((item) => item.id === id)
-}
 // input 组件
+// let InputCom = defineComponent({
+//     props: {
+//         value: [String, Number],
+//         onUpdateValue:[Function,Array]
+//     },
+//     setup(props) {
+//         const isEdit = ref(false)
+//         const inputRef = ref(null)
+//         const inputValue = ref(props.value)
+//         function handleOnClick() {
+//             isEdit.value = true
+//             nextTick(() => {
+//                 inputRef.value.focus()
+//             })
+//         }
+//         function handleChange() {
+//             props.onUpdateValue(inputValue.value)
+//             isEdit.value = false
+//         }
+//         return () => {
+//             h('div', { style: 'min-height: 22px', onClick: handleOnClick },
+//                 isEdit.value ? h(NInput, {
+//                     ref:inputRef,
+//                     value: inputValue.value,
+//                     onUpdateValue: (v) => {
+//                         inputValue.value = v
+//                     },
+//                     onChange: handleChange,
+//                     onBlur: handleChange
+//                 }) : props.value
+//             )
+//         }
+//     }
+// })
+
+// tabs
 
 </script>
 <style lang="scss" scoped>
